@@ -1,0 +1,193 @@
+version: "3.8"
+
+services:
+
+  gitea:
+    image: gitea/gitea:1.15.0
+    container_name: gitea
+    restart: always
+    ports:
+      - "3000:3000"
+      - "1022:22"
+    volumes:
+      - ${volume_gitea}:/data
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - SSH_DOMAIN=gitea.tonyjhang.tk
+      - ROOT_URL=http://gitea.tonyjhang.tk:3000
+      - HTTP_PORT=3000
+    networks:
+      local-develop-network:
+        aliases:
+          - gitea.tonyjhang.tk
+
+  drone-server:
+    image: drone/drone:2.0.6
+    container_name: drone-server
+    restart: always
+    ports:
+      - "80:80"  # 會影響 內/外通訊，Gitea填寫應用程式導轉時，需要使用本機 port，webhook給drone時會需要使用內部port，而webhook的Domain&port是根據設定應用程式授權時填寫的資訊
+    volumes:
+      - ${volume_drone}:/data
+    depends_on:
+      - gitea
+    environment:
+      - TZ=Asia/Taipei
+      - DRONE_GITEA_SERVER=http://gitea.tonyjhang.tk:3000
+      - DRONE_GITEA_CLIENT_ID=${DRONE_GITEA_CLIENT_ID}
+      - DRONE_GITEA_CLIENT_SECRET=${DRONE_GITEA_CLIENT_SECRET}
+      - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
+      - DRONE_SERVER_HOST=drone.tonyjhang.tk
+      - DRONE_SERVER_PROTO=http
+      - DRONE_USER_CREATE=username:${drone_admin},admin:true # 冒號後面請填上Giea授權給drone的帳戶，並提升為admin，這樣在drone頁面才能找到 Project Settings 的選項
+      - DRONE_LOGS_COLOR=true
+      - DRONE_LOGS_DEBUG=true
+      - DRONE_LOGS_PRETTY=true
+      - DRONE_LOGS_TRACE=true
+    networks:
+      local-develop-network:
+        aliases:
+          - drone.tonyjhang.tk
+
+  drone-runner:
+    image: drone/drone-runner-docker:1.6.3
+    container_name: drone-runner
+    restart: always
+    depends_on:
+      - drone-server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${volume_drone_runner}:/data
+    environment:
+      - DRONE_RPC_HOST=drone.tonyjhang.tk # 填寫drone-server對內通訊的host
+      - DRONE_RPC_PROTO=http
+      - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
+      - DRONE_RUNNER_CAPACITY=10
+      - DRONE_RUNNER_NETWORKS=local-develop-network # 必須要指定，不然 clone 時會連不到 Gitea
+    networks:
+      - local-develop-network
+
+  docker-registry:
+    image: registry:2
+    container_name: docker-registry
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - ${volume_docker_registry}:/var/lib/registry
+    networks:
+      local-develop-network:
+        aliases:
+          - registry.tonyjhang.tk
+      k3d-mycluster:
+        aliases:
+          - registry.tonyjhang.tk
+
+  docker-registry-frontend:
+    image: konradkleine/docker-registry-frontend:v2
+    container_name: docker-registry-frontend
+    restart: always
+    depends_on:
+      - docker-registry
+    ports:
+      - "1180:80"
+    environment:
+      - ENV_DOCKER_REGISTRY_HOST=registry.tonyjhang.tk
+      - ENV_DOCKER_REGISTRY_PORT=5000
+    networks:
+      local-develop-network:
+        aliases:
+          - registry-frontend.tonyjhang.tk
+
+networks:
+  local-develop-network:
+    external:
+      name: local-develop-network
+  k3d-mycluster:
+    external:
+      name: k3d-mycluster
+
+# Gitea 觸發 drone 的 webhook 會自行建立，如果要一個分支一個webhook來管理觸發條件的話，可以手動建立webhook，可以參照自動建立的webhook資訊來建立，secret與URL的secret一致
+
+# 因為 k3d 是透過  k3d-mycluster-serverlb 來讓本機可以存取到 k3d 本體，所以 Drone 要能夠 deploy 到 k3d，k3d-mycluster-serverlb 需要加入 local-develop-network，
+# 來讓 Drone 能夠找到 k3d-mycluster-serverlb 進而控制 k3d
+# docker network connect local-develop-network k3d-mycluster-serverlb
+
+#k3d cluster create mycluster --volume $HOME/.k3d/registries.yaml:/etc/rancher/k3s/registries.yaml
+#k3d cluster delete mycluster
+#
+#docker container run -d --name registry.tonyjhang.tk --restart always -p 5000:5000 registry:2
+#docker network connect k3d-mycluster registry.tonyjhang.tk
+#127.0.0.1 registry.tonyjhang.tk
+#
+#docker pull nginx:latest
+#docker tag nginx:latest registry.tonyjhang.tk:5000/nginx:latest
+#docker push registry.tonyjhang.tk:5000/nginx:latest
+#
+#cat <<EOF | kubectl apply -f -
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: nginx-test-registry
+#  labels:
+#    app: nginx-test-registry
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      app: nginx-test-registry
+#  template:
+#    metadata:
+#      labels:
+#        app: nginx-test-registry
+#    spec:
+#      containers:
+#      - name: nginx-test-registry
+#        image: registry.tonyjhang.tk:5000/nginx:latest
+#        ports:
+#        - containerPort: 80
+#EOF
+#
+#---
+#```
+#mirrors:
+#  registry.tonyjhang.tk:5000:   # 重點是這裡要跟 endpoint 一樣
+#    endpoint:
+#      - "http://registry.tonyjhang.tk:5000"
+#```
+#k3d cluster create mycluster --volume $HOME/.k3d/registries.yaml:/etc/rancher/k3s/registries.yaml
+#k3d cluster delete mycluster
+#
+#docker-compose up -d
+#
+#127.0.0.1 registry.tonyjhang.tk
+#
+#docker pull nginx:latest
+#docker tag nginx:latest registry.tonyjhang.tk:5000/nginx:latest
+#docker push registry.tonyjhang.tk:5000/nginx:latest
+#
+#cat <<EOF | kubectl apply -f -
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: nginx-test-registry
+#  labels:
+#    app: nginx-test-registry
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      app: nginx-test-registry
+#  template:
+#    metadata:
+#      labels:
+#        app: nginx-test-registry
+#    spec:
+#      containers:
+#      - name: nginx-test-registry
+#        image: registry.tonyjhang.tk:5000/nginx:latest
+#        ports:
+#        - containerPort: 80
+#EOF

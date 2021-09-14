@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: drone-deploy
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: drone-deploy
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+  - kind: ServiceAccount
+    name: drone-deploy
+    namespace: default
+
+# 查看 K8s CA
+# kubectl get secret [Secret_Name] -o yaml | egrep 'ca.crt:|token:'
+
+# 查看 service account Token
+# kubectl describe secret -n [Namespace] [ServiceAccount-token-*]

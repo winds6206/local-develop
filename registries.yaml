@@ -1,0 +1,4 @@
+mirrors:
+  registry.tonyjhang.tk:5000:
+    endpoint:
+      - "http://registry.tonyjhang.tk:5000"
