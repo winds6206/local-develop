@@ -26,7 +26,9 @@ pipeline:
     registry: registry.tonyjhang.tk:5000  # 使用 private registry
     repo: registry.tonyjhang.tk:5000/helloworld-${DRONE_BRANCH}
 #    repo: registry.tonyjhang.tk:5000/${DRONE_REPO}-${DRONE_BRANCH}
-# REPO 名稱使用變數 ${DRONE_REPO}，會帶上 Gitea 創建該 REPO 的使用者帳號，ex: xxx/helloworld，所以此時推上 docker-registry 會變成 registry.tonyjhang.tk:5000/xxx/helloworld-master:latest
+# REPO 名稱使用變數 ${DRONE_REPO}，會帶上 Gitea 創建該 REPO 的使用者帳號，ex: xxx/helloworld，
+# 所以此時推上 docker-registry 會變成 registry.tonyjhang.tk:5000/xxx/helloworld-master:latest，
+# 如果要使用此變數請注意 K8s YAML 映像檔路徑寫法
     dockerfile: ./Dockerfile
     tags:
       - latest
@@ -42,8 +44,8 @@ pipeline:
       - source: k8s_token # token
         target: plugin_kubernetes_token
 #    kubernetes_server: https://k3d-mycluster-serverlb:6443
-#    kubernetes_cert: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJkekNDQVIyZ0F3SUJBZ0lCQURBS0JnZ3Foa2pPUFFRREFqQWpNU0V3SHdZRFZRUUREQmhyTTNNdGMyVnkKZG1WeUxXTmhRREUyTWprNU5EWTROVE13SGhjTk1qRXdPREkyTURNd01EVXpXaGNOTXpFd09ESTBNRE13TURVegpXakFqTVNFd0h3WURWUVFEREJock0zTXRjMlZ5ZG1WeUxXTmhRREUyTWprNU5EWTROVE13V1RBVEJnY3Foa2pPClBRSUJCZ2dxaGtqT1BRTUJCd05DQUFRS2wrRllVWTJCYm9NbkgyZlVNTzhDenlkSVVFQ285a0tyTk9YNFNoRGYKLzhLSkNNODBRbE1FaXV1RnBGZ1A0TDNtZnBmT2Y5Wm5ZTkc3Q3dtVkR0M1hvMEl3UURBT0JnTlZIUThCQWY4RQpCQU1DQXFRd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlZIUTRFRmdRVUtLazBINEU5M25xdEFWWTZQb1R5Cmo2T2dKc2N3Q2dZSUtvWkl6ajBFQXdJRFNBQXdSUUlnRDdSbWJnbHRHYTRWOEMvNk4zNXBTSDlhNkM3aCtzVkEKMUVybjJDdE9FK01DSVFDV3ExaHpVdEhqNG82dXByczVCZEtYazRLckUrMXhEUkxGa2Y5Ym1QR2pFZz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
-#    kubernetes_token: eyJhbGciOiJSUzI1NiIsImtpZCI6IjRNT0Q4alhVZEJMYk1HeGx6ZVhUZFBNVGxxQ3BDeFpqaElQZ2hpUDVQSjgifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRyb25lLWRlcGxveS10b2tlbi1ncXA4dyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJkcm9uZS1kZXBsb3kiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI3MWMwMjM1Mi00ZDQ1LTRjMzYtOTk0ZC0yNzc1NDc3MjllMzAiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDpkcm9uZS1kZXBsb3kifQ.VsoK6u6eMbmuyMf8Yp7d0ITiWy2odCFXjEPoCzqzgDYLKFDlR7QCupBcQancf1NollrJxHnt3I3vOe4RSBijXD1IGSUPQgRmpRqbLt6ootS7G-IppMPORZ-85F2ahaocv3qNDIrGIKIuLMLyJ55ml2THOgl400kmbEYg5-E3HFjh42BY_CMPxan9Cqdn1mDCCzP9lYdnaCbQyVLK5sOLK9Ctg3YKUzMWwFjoXYQdfzyJZQiXMpoxwRgxFOnaQFTJ-qom_joAUwXC48lwld895bp1ofre-3JEOlDrC8v2A1KfPX18LySXu7HsHjOSJ5bMDiPmy3_GyM4m_SzR-LogM
+#    kubernetes_cert: ...
+#    kubernetes_token: ...
     namespace: default
     deployment: helloworld
     repo: registry.tonyjhang.tk:5000/helloworld-${DRONE_BRANCH}
