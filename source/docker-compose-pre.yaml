@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+
+  gitea:
+    image: gitea/gitea:1.15.0
+    container_name: gitea
+    restart: always
+    ports:
+      - "3000:3000"
+      - "1022:22"
+    volumes:
+      - ${volume_gitea}:/data
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - SSH_DOMAIN=gitea.tonyjhang.tk
+      - ROOT_URL=http://gitea.tonyjhang.tk:3000
+      - HTTP_PORT=3000
+    networks:
+      local-develop-network:
+        aliases:
+          - gitea.tonyjhang.tk
+
+networks:
+  local-develop-network:
+    external:
+      name: local-develop-network

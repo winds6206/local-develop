@@ -1,0 +1,110 @@
+version: "3.8"
+
+services:
+
+  gitea:
+    image: gitea/gitea:1.15.0
+    container_name: gitea
+    restart: always
+    ports:
+      - "3000:3000"
+      - "1022:22"
+    volumes:
+      - ${volume_gitea}:/data
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - SSH_DOMAIN=gitea.tonyjhang.tk
+      - ROOT_URL=http://gitea.tonyjhang.tk:3000
+      - HTTP_PORT=3000
+    networks:
+      local-develop-network:
+        aliases:
+          - gitea.tonyjhang.tk
+
+  drone-server:
+    image: drone/drone:2.0.6
+    container_name: drone-server
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ${volume_drone}:/data
+    depends_on:
+      - gitea
+    environment:
+      - TZ=Asia/Taipei
+      - DRONE_GITEA_SERVER=http://gitea.tonyjhang.tk:3000
+      - DRONE_GITEA_CLIENT_ID=${DRONE_GITEA_CLIENT_ID}
+      - DRONE_GITEA_CLIENT_SECRET=${DRONE_GITEA_CLIENT_SECRET}
+      - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
+      - DRONE_SERVER_HOST=drone.tonyjhang.tk
+      - DRONE_SERVER_PROTO=http
+      - DRONE_USER_CREATE=username:${drone_admin},admin:true
+      - DRONE_LOGS_COLOR=true
+      - DRONE_LOGS_DEBUG=true
+      - DRONE_LOGS_PRETTY=true
+      - DRONE_LOGS_TRACE=true
+    networks:
+      local-develop-network:
+        aliases:
+          - drone.tonyjhang.tk
+
+  drone-runner:
+    image: drone/drone-runner-docker:1.6.3
+    container_name: drone-runner
+    restart: always
+    depends_on:
+      - drone-server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${volume_drone_runner}:/data
+    environment:
+      - DRONE_RPC_HOST=drone.tonyjhang.tk
+      - DRONE_RPC_PROTO=http
+      - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
+      - DRONE_RUNNER_CAPACITY=10
+      - DRONE_RUNNER_NETWORKS=local-develop-network
+    networks:
+      - local-develop-network
+
+  docker-registry:
+    image: registry:2
+    container_name: docker-registry
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - ${volume_docker_registry}:/var/lib/registry
+    networks:
+      local-develop-network:
+        aliases:
+          - registry.tonyjhang.tk
+      k3d-mycluster:
+        aliases:
+          - registry.tonyjhang.tk
+
+  docker-registry-frontend:
+    image: konradkleine/docker-registry-frontend:v2
+    container_name: docker-registry-frontend
+    restart: always
+    depends_on:
+      - docker-registry
+    ports:
+      - "1180:80"
+    environment:
+      - ENV_DOCKER_REGISTRY_HOST=registry.tonyjhang.tk
+      - ENV_DOCKER_REGISTRY_PORT=5000
+    networks:
+      local-develop-network:
+        aliases:
+          - registry-frontend.tonyjhang.tk
+
+networks:
+  local-develop-network:
+    external:
+      name: local-develop-network
+  k3d-mycluster:
+    external:
+      name: k3d-mycluster
