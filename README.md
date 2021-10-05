@@ -58,7 +58,7 @@ http://gitea.tonyjhang.tk:3000/
 
 - drone_admin=drone
 
-> 這邊強烈建議建立 Drone 專用帳號，原因是只要透過 Drone 所 build 的映像檔再上傳到 docker-registry，路徑會是 `registry.tonyjhang.tk:5000/[drone帳號]/xxx:latest`，如果今天帳號是 drone，此時省略帳號路徑，會變成 `registry.tonyjhang.tk:5000/xxx:latest`，所以建議建立 drone 帳號，co-worker 上會比較不便利
+> 建議建立一個 static account，例如：drone 帳號
 
 6. 於該頁面設定 Drone 應用程式授權資訊，重新導向URI 請填入 `http://drone.tonyjhang.tk/login`
 
@@ -168,6 +168,5 @@ k8s_token=填入剛才的token
 ![](./images/10.png)
 
 4. 將 helloworld 該包程式碼內的 k8s.yaml 部署到 K3d 內，此時會發現映像檔抓不到 → 正常現象，因為還沒有映像檔
-5. 調整一下 helloworld 內的 README.md 再推上 Gitea 此時就會觸發 Drone，會根據 .drone.yml 來進行 CI/CD 流程，此時可以打開 Drone 頁面來觀察，等待 CI/CD 結束後，可以回到 K3d 去下 `kubectl get pod`，此時就可以發現 Pod 順利啟動了，在 docker-registry 上也會多一個映像檔 `registry.tonyjhang.tk:5000/helloworld-master:latest`
 
-### 注意事項
+5. 調整一下 helloworld 內的 README.md 再推上 Gitea 此時就會觸發 Drone，會根據 `.drone.yml` 來進行 CI/CD 流程，此時可以打開 Drone 頁面來觀察，等待 CI/CD 結束後，可以回到 K3d 去下 `kubectl get pod`，此時就可以發現 Pod 順利啟動了，在 docker-registry 上也會多一個映像檔 `registry.tonyjhang.tk:5000/helloworld-master:latest`

@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: external-ingress
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+#  defaultBackend:
+#    service:
+#      name: helloworld
+#      port:
+#        number: 80
+  rules:
+    - host: helloworld.tonyjhang.tk
+      http:
+        paths:
+        - path: /
+#          pathType: Prefix
+          pathType: Exact
+          backend:
+            service:
+              name: helloworld
+              port:
+                number: 80
+
+# 測試指令：curl -H "Host: helloworld.tonyjhang.tk" http://127.0.0.1:1280
+# port 1280 是因為我們在建立 K3d 時有指定 LB 的 port-mapping
