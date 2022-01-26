@@ -95,15 +95,19 @@ docker-compose up -d
 10. 連線 Drone 進行剛剛在 Giea 上設定的授權驗證
 
 點擊「CONTINUE」
+
 <img src='./images/4.png' align='float:left' style=' width:500px;height:100 px'/>
 
 點擊「授權應用程式」
+
 <img src='./images/5.png' align='float:left' style=' width:500px;height:100 px'/>
 
 直接點擊「SUBMIT」
+
 <img src='./images/6.png' align='float:left' style=' width:500px;height:100 px'/>
 
 成功授權後就會自動進到該頁面
+
 <img src='./images/7.png' align='float:left' style=' width:500px;height:100 px'/>
 
 11. 因為 docker-registry 並沒有提供 UI 介面，這邊有使用其他人開發出來的前端頁面來進行 UI 顯示，可以連線到
