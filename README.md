@@ -1,6 +1,12 @@
 # local-develop
 
-## 本機開發CI/CD流程建置方式
+該專案主要以 k3d 為服務運行平台、gitea 為 repository 存放區、registry 為 image 存放區，並且以 drone 來達到 CI/CD 的功能，夠讓使用者在本機開發時進行各種測試
+
+以下為該專案架構圖
+
+<img src='./Self-Hosted Develop.png' align='float:left'/>
+
+## 本機開發 CI/CD 流程建置方式
 
 ### 建立Portainer
 
@@ -23,7 +29,7 @@ docker run -d -p 9000:9000 \
 portainer/portainer:1.24.2
 ```
 
-測試
+開啟瀏覽器測試
 
 ```
 http://127.0.0.1:9000
