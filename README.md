@@ -62,7 +62,7 @@ http://gitea.tonyjhang.tk:3000/
 
 6. 於該頁面設定 Drone 應用程式授權資訊，重新導向URI 請填入 `http://drone.tonyjhang.tk/login`
 
-<img src='./images/2.png' align='float:left' style=' width:500px;height:100 px'/>
+<img src='./images/2.png' align='float:left'/>
 
 7. 將 客戶端 ID / 客戶端密鑰 填入 `.env` 檔案內
 
@@ -72,7 +72,7 @@ http://gitea.tonyjhang.tk:3000/
 
 > 如果真的想更改 DRONE_RPC_SECRET的值 可以使用該指令來產生 `openssl rand -hex 16`
 
-<img src='./images/3.png' align='float:left' style=' width:500px;height:100 px'/>
+<img src='./images/3.png' align='float:left'/>
 
 8. 調整 Gitea 的 port，在 docker-compose 上 port-mapping 1022:22，我們本機使用 1022 與 Gitea 的 22port 做通訊，所以需要調整一下 Gitea 的 app.ini 檔案，可以參照 `.env` 內 volume_gitea 的位置，預設在 `~/Documents/local_develop/gitea`，app.ini 的絕對路徑為 `~/Documents/local_develop/gitea/gitea/conf/app.ini`。
 
@@ -96,19 +96,19 @@ docker-compose up -d
 
 點擊「CONTINUE」
 
-<img src='./images/4.png' align='float:left' style=' width:500px;height:100 px'/>
+<img src='./images/4.png' align='float:left' style=' width:400px;height:100 px'/>
 
 點擊「授權應用程式」
 
-<img src='./images/5.png' align='float:left' style=' width:500px;height:100 px'/>
+<img src='./images/5.png' align='float:left' style=' width:400px;height:100 px'/>
 
 直接點擊「SUBMIT」
 
-<img src='./images/6.png' align='float:left' style=' width:500px;height:100 px'/>
+<img src='./images/6.png' align='float:left' style=' width:400px;height:100 px'/>
 
 成功授權後就會自動進到該頁面
 
-<img src='./images/7.png' align='float:left' style=' width:500px;height:100 px'/>
+<img src='./images/7.png' align='float:left' style=' width:400px;height:100 px'/>
 
 11. 因為 docker-registry 並沒有提供 UI 介面，這邊有使用其他人開發出來的前端頁面來進行 UI 顯示，可以連線到
 ```
@@ -133,9 +133,9 @@ http: server gave HTTP response to HTTPS client
 ],
 ```
 
-<img src='./images/8.png' align='float:left' style=' width:500px;height:100 px'/>
+<img src='./images/8.png' align='float:left' style=' width:300px;height:100 px'/>
 
-<img src='./images/9.png' align='float:left' style=' width:500px;height:100 px'/>
+<img src='./images/9.png' align='float:left' style=' width:400px;height:100 px'/>
 
 ### CI/CD 流程建置 & k3d Ingress 的使用
 
@@ -169,7 +169,7 @@ k8s_cert=填入剛才的ca.crt
 k8s_token=填入剛才的token
 ```
 
-<img src='./images/10.png' align='float:left' style=' width:500px;height:100 px'/>
+<img src='./images/10.png' align='float:left'/>
 
 4. 將 helloworld 該包程式碼內的 k8s.yaml 部署到 K3d 內，此時會發現映像檔抓不到 → 正常現象，因為還沒有映像檔
 
